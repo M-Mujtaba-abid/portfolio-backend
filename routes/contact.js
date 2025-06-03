@@ -20,38 +20,12 @@ const contactLimiter = rateLimit({
 router.post("/", contactLimiter, validateContactForm, async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
-    await Contact.create({ name, email, subject, message }); // ✅ Save to MongoDB
-
-    // Log the contact form submission
-    console.log("📧 New contact form submission:", {
-      name,
-      email,
-      subject,
-      timestamp: new Date().toISOString(),
-      ip: req.ip,
-    });
-
-    // Send email (if email service is configured)
-    try {
-      await sendContactEmail({ name, email, subject, message });
-      console.log("✅ Email sent successfully");
-    } catch (emailError) {
-      console.error("❌ Email sending failed:", emailError.message);
-      // Continue even if email fails - we still want to log the submission
-    }
-
-    // Store in database (if database is configured)
-    // await saveContactSubmission({ name, email, subject, message })
+    const contact = await Contact.create({ name, email, subject, message });
 
     res.status(200).json({
       success: true,
       message: "Message sent successfully!",
-      data: {
-        name,
-        email,
-        subject,
-        timestamp: new Date().toISOString(),
-      },
+      contact,
     });
   } catch (error) {
     console.error("Contact form error:", error);
