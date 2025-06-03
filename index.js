@@ -9,14 +9,19 @@ dotenv.config();
 const app = express();
 connectDB();
 
-app.use(cors({
-  origin: process.env.CLIENT_URL, 
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
+app.get("/", (_, res) => {
+  res.send("Portfolio server working");
+});
 
 app.use("/api/contact", contactRoutes);
 
