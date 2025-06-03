@@ -1,12 +1,10 @@
-import express from "express"
-import rateLimit from "express-rate-limit"
-import { sendContactEmail } from "../services/emailService.js"
-import { validateContactForm } from "../middleware/validation.js"
-import Contact from "../models/Contact.js" // <--- ✅ Add this
+import express from "express";
+import rateLimit from "express-rate-limit";
+import { sendContactEmail } from "../services/emailService.js";
+import { validateContactForm } from "../middleware/validation.js";
+import Contact from "../models/Contact.js"; // <--- ✅ Add this
 
-const router = express.Router()
-
-
+const router = express.Router();
 
 // Rate limiting for contact form
 const contactLimiter = rateLimit({
@@ -16,13 +14,13 @@ const contactLimiter = rateLimit({
     error: "Too many contact form submissions",
     message: "Please wait before sending another message.",
   },
-})
+});
 
 // POST /api/contact
 router.post("/", contactLimiter, validateContactForm, async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body
-     await Contact.create({ name, email, subject, message }) // ✅ Save to MongoDB
+    const { name, email, subject, message } = req.body;
+    await Contact.create({ name, email, subject, message }); // ✅ Save to MongoDB
 
     // Log the contact form submission
     console.log("📧 New contact form submission:", {
@@ -31,14 +29,14 @@ router.post("/", contactLimiter, validateContactForm, async (req, res) => {
       subject,
       timestamp: new Date().toISOString(),
       ip: req.ip,
-    })
+    });
 
     // Send email (if email service is configured)
     try {
-      await sendContactEmail({ name, email, subject, message })
-      console.log("✅ Email sent successfully")
+      await sendContactEmail({ name, email, subject, message });
+      console.log("✅ Email sent successfully");
     } catch (emailError) {
-      console.error("❌ Email sending failed:", emailError.message)
+      console.error("❌ Email sending failed:", emailError.message);
       // Continue even if email fails - we still want to log the submission
     }
 
@@ -54,26 +52,25 @@ router.post("/", contactLimiter, validateContactForm, async (req, res) => {
         subject,
         timestamp: new Date().toISOString(),
       },
-    })
+    });
   } catch (error) {
-    console.error("Contact form error:", error)
+    console.error("Contact form error:", error);
     res.status(500).json({
       success: false,
       error: "Internal server error",
       message: "Failed to send message. Please try again later.",
-    })
+    });
   }
-})
+});
 
 // GET /api/contact (for testing)
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  const contacts = await Contact.find();
+
   res.status(200).json({
     message: "Contact API is working",
-    endpoints: {
-      POST: "/api/contact - Send contact form",
-      GET: "/api/contact - This endpoint",
-    },
-  })
-})
+    contacts,
+  });
+});
 
-export default router
+export default router;
