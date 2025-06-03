@@ -10,14 +10,14 @@ const app = express();
 connectDB();
 
 app.use(cors({
-  origin: process.env.CLIENT_URL, // allow only your frontend URL
+  origin: process.env.CLIENT_URL, 
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
 
 app.use(express.json());
 
-// your routes
+
 app.use("/api/contact", contactRoutes);
 
 const PORT = process.env.PORT || 5000;
