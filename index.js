@@ -9,13 +9,27 @@ dotenv.config();
 const app = express();
 connectDB();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://portfolio-frontend-three-red.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS",
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
   })
 );
+
 
 app.use(express.json());
 
